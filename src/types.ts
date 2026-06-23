@@ -26,6 +26,7 @@ export enum PredictionStatus {
 }
 
 export interface Match {
+  _id: String,
   id: string; // matches document ID as matchId
   homeTeam: string;
   awayTeam: string;

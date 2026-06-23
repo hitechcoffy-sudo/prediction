@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  Match, 
-  Prediction, 
-  UserProfile, 
-  MatchStatus, 
-  PredictionStatus, 
-  MatchStage 
+import {
+  Match,
+  Prediction,
+  UserProfile,
+  MatchStatus,
+  PredictionStatus,
+  MatchStage
 } from '../types';
 import { calculatePoints } from '../utils/scoring';
 import { safeStorage } from '../utils/storage';
@@ -71,13 +71,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [leaderboard, setLeaderboard] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [activeStage, setActiveStage] = useState<string>('Unfinished');
-  
+
   const [isFirebase, setIsFirebase] = useState<boolean>(() => {
     // Clear legacy local mode fallback so we immediately connect to the reset Firebase instance
     localStorage.removeItem('tml_local_mode_fallback');
     return isFirebaseSupported;
   });
-  
+
   const [cloudQuotaExceeded, setCloudQuotaExceeded] = useState<boolean>(false);
 
   const resetCloudDatabaseAttempt = () => {
@@ -89,8 +89,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkQuotaError = (error: any): boolean => {
     const errMsg = error?.message || String(error);
     if (
-      errMsg.toLowerCase().includes('quota') || 
-      errMsg.toLowerCase().includes('exhausted') || 
+      errMsg.toLowerCase().includes('quota') ||
+      errMsg.toLowerCase().includes('exhausted') ||
       error?.code === 'resource-exhausted'
     ) {
       setCloudQuotaExceeded(true);
@@ -117,7 +117,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!res.ok) throw new Error(await res.text());
       const uList: UserProfile[] = await res.json();
       setLeaderboard(uList);
-      
+
       const activeUser = customUserArg !== undefined ? customUserArg : currentUser;
       const currentId = activeUser?.uid || auth?.currentUser?.uid;
       if (currentId) {
@@ -144,7 +144,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (matchesRes.ok) {
         const allMatches: Match[] = await matchesRes.json();
         let filteredMatches = allMatches;
-        
+
         // Non-admins only view specific stages or unfinished matches
         const isAdmin = currentUser?.isAdmin || (uid && uid === 'admin-mo') || (currentUser?.email === ADMIN_EMAIL);
         if (!isAdmin) {
@@ -154,7 +154,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             filteredMatches = allMatches.filter(m => m.stage === activeStage);
           }
         }
-        
+
         // Sort matches
         filteredMatches.sort((a, b) => {
           if (a.isCustom && !b.isCustom) return -1;
@@ -201,7 +201,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Load and subscribe to database (MongoDB via REST APIs or LocalStorage)
   useEffect(() => {
-    let unsubscribeAuth: () => void = () => {};
+    let unsubscribeAuth: () => void = () => { };
 
     if (isFirebase) {
       setIsFirebase(true);
@@ -245,7 +245,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const currentProfile = await syncRes.json();
                 localStorage.setItem('tml_currentUser', JSON.stringify(currentProfile));
                 setCurrentUser(currentProfile);
-                
+
                 // Load updated predictions immediately
                 const predsRes = await fetch(`/api/predictions/user/${currentProfile.uid}`);
                 if (predsRes.ok) {
@@ -275,7 +275,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       // Local Sandbox Mode
       setIsFirebase(false);
-      
+
       const localMatches = localStorage.getItem('tml_matches');
       const localPredictions = localStorage.getItem('tml_predictions');
       const localLeaderboard = localStorage.getItem('tml_leaderboard');
@@ -339,7 +339,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const cleanNumber = numberInput.trim();
-      
+
       if (isFirebase) {
         const res = await fetch('/api/users/login', {
           method: 'POST',
@@ -353,7 +353,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const profile = await res.json();
         localStorage.setItem('tml_currentUser', JSON.stringify(profile));
         setCurrentUser(profile);
-        
+
         // Load predictions immediately
         const predsRes = await fetch(`/api/predictions/user/${profile.uid}`);
         if (predsRes.ok) {
@@ -363,7 +363,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Sandbox login
         const existingUsers: UserProfile[] = JSON.parse(localStorage.getItem('tml_leaderboard') || '[]');
         let user = existingUsers.find(u => u.email.toLowerCase() === cleanNumber.toLowerCase());
-        
+
         if (!user) {
           const isUserAdmin = cleanNumber.toLowerCase() === ADMIN_EMAIL.toLowerCase();
           const newUser: UserProfile = {
@@ -379,7 +379,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.setItem('tml_leaderboard', JSON.stringify(existingUsers));
           user = newUser;
         }
-        
+
         localStorage.setItem('tml_currentUser', JSON.stringify(user));
         setCurrentUser(user);
       }
@@ -396,7 +396,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const cleanNumber = numberInput.trim();
-      
+
       if (isFirebase) {
         const res = await fetch('/api/users/signup', {
           method: 'POST',
@@ -415,7 +415,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Sandbox Sign Up
         const existingUsers: UserProfile[] = JSON.parse(localStorage.getItem('tml_leaderboard') || '[]');
         const isUserAdmin = cleanNumber.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-        
+
         if (existingUsers.some(u => u.email.toLowerCase() === cleanNumber.toLowerCase())) {
           throw new Error("This number is already in use in the sandbox database!");
         }
@@ -429,14 +429,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           correctOutcomesCount: 0,
           isAdmin: isUserAdmin
         };
-        
+
         existingUsers.push(newUser);
         localStorage.setItem('tml_leaderboard', JSON.stringify(existingUsers));
         const filteredAndSorted = existingUsers
           .filter(u => !u.isAdmin)
           .sort((a, b) => b.totalPoints - a.totalPoints || a.displayName.localeCompare(b.displayName));
         setLeaderboard(filteredAndSorted);
-        
+
         localStorage.setItem('tml_currentUser', JSON.stringify(newUser));
         setCurrentUser(newUser);
         setPredictions([]);
@@ -533,7 +533,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Save prediction
   const savePrediction = async (matchId: string, homePredicted: number, awayPredicted: number, shootoutWinner?: 'home' | 'away' | null) => {
     if (!currentUser) throw new Error("You must be logged in to make predictions!");
-
+    console.log("asas", matchId)
     const match = matches.find(m => m.id === matchId);
     if (!match) throw new Error("Match not found!");
 
@@ -569,7 +569,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const errData = await res.json();
           throw new Error(errData.error || "Failed to save prediction");
         }
-        
+
         // Fetch updated predictions list immediately
         const predsRes = await fetch(`/api/predictions/user/${currentUser.uid}`);
         if (predsRes.ok) {
@@ -583,7 +583,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Sandbox implementation
       const keys: Prediction[] = JSON.parse(localStorage.getItem('tml_predictions') || '[]');
       const updatedKeys = keys.filter(p => p.id !== predictionId);
-      
+
       const newPred: Prediction = {
         id: predictionId,
         userId: currentUser.uid,
@@ -597,7 +597,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         status: PredictionStatus.PENDING,
         updatedAt: new Date().toISOString()
       };
-      
+
       updatedKeys.push(newPred);
       localStorage.setItem('tml_predictions', JSON.stringify(updatedKeys));
       setPredictions(updatedKeys);
@@ -637,7 +637,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Local Sandbox scoring logic
       const wasFinalized = matchObj.status === MatchStatus.FINISHED && matchObj.homeScore !== null && matchObj.awayScore !== null;
       const isKnockout = matchObj.stage !== MatchStage.GROUP_STAGE;
-      
+
       let currentMatches: Match[] = JSON.parse(localStorage.getItem('tml_matches') || '[]');
       currentMatches = currentMatches.map(m => {
         if (m.id === matchId) {
@@ -780,7 +780,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const errData = await res.json();
           throw new Error(errData.error || "Failed to seed data");
         }
-        
+
         await fetchCloudData();
         console.log("Seeding in MongoDB complete!");
       } catch (err) {
@@ -796,7 +796,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       filteredLeaderboard.sort((a, b) => b.totalPoints - a.totalPoints || a.displayName.localeCompare(b.displayName));
       setLeaderboard(filteredLeaderboard);
       setPredictions([]);
-      
+
       const admin = defaultMockLeaderboard.find(u => u.uid === ADMIN_EMAIL);
       if (admin) {
         localStorage.setItem('tml_currentUser', JSON.stringify(admin));
@@ -820,6 +820,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const matchId = 'm' + Math.random().toString(36).substring(2, 9);
     const newMatch: Match = {
       id: matchId,
+      _id: matchId,
       homeTeam: matchData.homeTeam,
       awayTeam: matchData.awayTeam,
       homeFlag: matchData.homeFlag || '⚽',
@@ -841,6 +842,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newMatch)
         });
+        console.log(res)
         if (!res.ok) {
           const errData = await res.json();
           throw new Error(errData.error || "Failed to add match");
@@ -885,7 +887,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       localStorage.setItem('tml_matches', JSON.stringify([]));
       localStorage.setItem('tml_predictions', JSON.stringify([]));
-      
+
       const currentLeaderboard: UserProfile[] = JSON.parse(localStorage.getItem('tml_leaderboard') || '[]');
       const resetLeaderboard = currentLeaderboard.map(u => ({
         ...u,
@@ -894,7 +896,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         correctOutcomesCount: 0
       }));
       localStorage.setItem('tml_leaderboard', JSON.stringify(resetLeaderboard));
-      
+
       setMatches([]);
       setPredictions([]);
       const filteredAndSorted = resetLeaderboard

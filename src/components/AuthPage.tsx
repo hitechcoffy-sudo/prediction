@@ -32,9 +32,9 @@ export const AuthPage: React.FC = () => {
           setIsLoading(false);
           return;
         }
-        await signUp(userNumber.trim(), displayName.trim(), password);
+        await signUp(userNumber.trim().toLowerCase(), displayName.trim(), password);
       } else {
-        await login(userNumber.trim(), password);
+        await login(userNumber.trim().toLowerCase(), password);
       }
     } catch (err: any) {
       console.error(err);
@@ -68,7 +68,7 @@ export const AuthPage: React.FC = () => {
         className="w-full max-w-md bg-slate-900/80 border border-slate-800/80 rounded-2xl p-6 md:p-8 backdrop-blur shadow-2xl relative z-10"
       >
         {/* Connection Switcher */}
-        <div className="mb-6 flex items-center justify-between p-2 rounded-xl bg-slate-950/80 border border-slate-800/60 shadow-inner select-none" id="db-mode-selector">
+        {/* <div className="mb-6 flex items-center justify-between p-2 rounded-xl bg-slate-950/80 border border-slate-800/60 shadow-inner select-none" id="db-mode-selector">
           <div className="flex items-center gap-2 pl-1.5">
             <span className={`w-2 h-2 rounded-full ${isFirebase ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-amber-400 animate-pulse'}`} />
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-sans">
@@ -87,7 +87,7 @@ export const AuthPage: React.FC = () => {
           >
             {isFirebase ? "Go Sandbox mode" : "Enable Firebase"}
           </button>
-        </div>
+        </div> */}
 
         {/* Brand Banner Header */}
         <div className="flex flex-col items-center text-center mb-6">
@@ -134,7 +134,7 @@ export const AuthPage: React.FC = () => {
 
         <div className="space-y-5" id="firebase-auth-section">
           {/* Google Sign In Federated Provider (Standard Option) */}
-          <div>
+          {/* <div>
             <button
               id="google-signin-btn"
               type="button"
@@ -169,11 +169,11 @@ export const AuthPage: React.FC = () => {
                 </>
               )}
             </button>
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-3 py-1 select-none">
             <span className="h-px bg-slate-800 flex-1" />
-            <span className="text-slate-500 text-[10px] uppercase font-bold tracking-wider">or sign in with credentials</span>
+            <span className="text-slate-500 text-[10px] uppercase font-bold tracking-wider"> sign in with credentials</span>
             <span className="h-px bg-slate-800 flex-1" />
           </div>
 
@@ -227,7 +227,7 @@ export const AuthPage: React.FC = () => {
 
             <div id="number-field-group">
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                Your Custom Number (e.g. Phone or Code)
+                Your Custom Number or email
               </label>
               <div className="relative">
                 <div id="hash-prefix" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs select-none">#</div>

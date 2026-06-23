@@ -33,6 +33,7 @@ mongoose.connect(mongoUri, { family: 4 })
 
 const MatchSchema = new mongoose.Schema({
   _id: { type: String, required: true },
+  id: { type: String, required: true },
   homeTeam: { type: String, required: true },
   awayTeam: { type: String, required: true },
   homeFlag: { type: String, default: '⚽' },
@@ -50,6 +51,7 @@ const MatchSchema = new mongoose.Schema({
 
 const PredictionSchema = new mongoose.Schema({
   _id: { type: String, required: true }, // userId_matchId
+  id: { type: String, required: true },
   userId: { type: String, required: true, index: true },
   userEmail: { type: String, required: true },
   displayName: { type: String, required: true },
@@ -167,6 +169,7 @@ app.post('/api/matches', async (req, res) => {
     const data = req.body;
     const match = new MatchModel({
       _id: data.id,
+      id: data.id,
       ...data
     });
     await match.save();
@@ -402,6 +405,7 @@ app.get('/api/predictions/user/:userId', async (req, res) => {
   const userId = req.params.userId;
   try {
     const list = await PredictionModel.find({ userId });
+    console.log(list)
     res.json(list);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

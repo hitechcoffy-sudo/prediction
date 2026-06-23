@@ -14,7 +14,7 @@ export const Leaderboard: React.FC = () => {
   const [extraMatches, setExtraMatches] = useState<{ [id: string]: Match }>({});
 
   // Filter leaderboard based on search term
-  const filteredLeaderboard = leaderboard.filter(player => 
+  const filteredLeaderboard = leaderboard.filter(player =>
     player.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     player.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -65,7 +65,7 @@ export const Leaderboard: React.FC = () => {
       if (isLocalOrSelf) {
         // If local/self, we can just get user's predictions from local context
         const selfPreds = predictions.filter(p => p.userId === selectedUser.uid);
-        
+
         // Find missing matchIds from local context 'matches' and 'extraMatches'
         const missingMatchIds: string[] = Array.from(new Set(
           selfPreds
@@ -120,6 +120,7 @@ export const Leaderboard: React.FC = () => {
       if (isFirebase) {
         try {
           const res = await fetch(`/api/predictions/user/${selectedUser.uid}`);
+          console.log(res)
           if (!res.ok) throw new Error("Failed to fetch predictions");
           const rawPreds: Prediction[] = await res.json();
 
@@ -223,9 +224,8 @@ export const Leaderboard: React.FC = () => {
                     <motion.tr
                       key={player.uid}
                       onClick={() => setSelectedUser(player)}
-                      className={`hover:bg-slate-850/60 transition cursor-pointer ${
-                        isMe ? 'bg-amber-500/5 border-l-2 border-l-amber-500' : ''
-                      }`}
+                      className={`hover:bg-slate-850/60 transition cursor-pointer ${isMe ? 'bg-amber-500/5 border-l-2 border-l-amber-500' : ''
+                        }`}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
@@ -304,8 +304,8 @@ export const Leaderboard: React.FC = () => {
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-end">
             {/* Overlay click to exit */}
             <div className="absolute inset-0" onClick={() => setSelectedUser(null)} />
-            
-            <motion.div 
+
+            <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
@@ -322,7 +322,7 @@ export const Leaderboard: React.FC = () => {
                     Viewing locks and completed outcomes of <span className="font-semibold text-amber-400">{selectedUser.displayName}</span>.
                   </p>
                 </div>
-                <button 
+                <button
                   onClick={() => setSelectedUser(null)}
                   className="w-8 h-8 rounded-full bg-slate-900 hover:bg-slate-850 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition cursor-pointer"
                 >
@@ -362,15 +362,14 @@ export const Leaderboard: React.FC = () => {
                       const isWinner = matchDetails.status === MatchStatus.FINISHED && pred.status === PredictionStatus.WINNER_CORRECT;
 
                       return (
-                        <div 
-                          key={pred.id} 
-                          className={`p-3.5 rounded-xl border flex flex-col justify-between gap-2.5 ${
-                            isExact 
-                              ? 'bg-amber-950/15 border-amber-500/20' 
-                              : isWinner 
-                                ? 'bg-slate-900 border-slate-850' 
+                        <div
+                          key={pred.id}
+                          className={`p-3.5 rounded-xl border flex flex-col justify-between gap-2.5 ${isExact
+                              ? 'bg-amber-950/15 border-amber-500/20'
+                              : isWinner
+                                ? 'bg-slate-900 border-slate-850'
                                 : 'bg-slate-900/40 border-slate-900'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center justify-between text-[10px] text-slate-500">
                             <span className="font-mono bg-slate-950 px-1.5 py-0.2 rounded text-[9px]">{matchDetails.stage}</span>
@@ -385,10 +384,10 @@ export const Leaderboard: React.FC = () => {
                               </span>
                             </div>
 
-                             <div className="flex flex-col text-center">
+                            <div className="flex flex-col text-center">
                               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">ACTUAL SCORE</span>
                               <span className="text-sm font-black font-mono text-slate-400 mt-0.5">
-                                {matchDetails.status === MatchStatus.FINISHED 
+                                {matchDetails.status === MatchStatus.FINISHED
                                   ? `${matchDetails.homeScore} - ${matchDetails.awayScore}`
                                   : matchDetails.status === MatchStatus.CANCELLED
                                     ? 'Cancelled'
@@ -398,11 +397,10 @@ export const Leaderboard: React.FC = () => {
 
                             <div className="flex flex-col text-right">
                               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">AWARDED</span>
-                              <span className={`text-sm font-black font-mono mt-0.5 ${
-                                isExact ? 'text-amber-400' : isWinner ? 'text-slate-200' : 'text-slate-500'
-                              }`}>
-                                {matchDetails.status === MatchStatus.FINISHED 
-                                  ? `+${pred.pointsAwarded} PTS` 
+                              <span className={`text-sm font-black font-mono mt-0.5 ${isExact ? 'text-amber-400' : isWinner ? 'text-slate-200' : 'text-slate-500'
+                                }`}>
+                                {matchDetails.status === MatchStatus.FINISHED
+                                  ? `+${pred.pointsAwarded} PTS`
                                   : matchDetails.status === MatchStatus.CANCELLED
                                     ? 'Cancelled'
                                     : 'Locked'}

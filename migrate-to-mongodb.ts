@@ -10,6 +10,7 @@ const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/tml-predi
 // Reuse models for migration
 const MatchSchema = new mongoose.Schema({
   _id: { type: String, required: true },
+  id: { type: String, required: true },
   homeTeam: { type: String, required: true },
   awayTeam: { type: String, required: true },
   homeFlag: { type: String, default: '⚽' },
@@ -71,9 +72,10 @@ async function runMigration() {
     for (const match of matchesArray) {
       const matchId = match.id || match.matchId || match._id;
       if (!matchId) continue;
-      
+
       const cleanMatch = {
         _id: matchId,
+        id: matchId,
         homeTeam: match.homeTeam,
         awayTeam: match.awayTeam,
         homeFlag: match.homeFlag || '⚽',
