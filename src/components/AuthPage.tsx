@@ -184,8 +184,8 @@ export const AuthPage: React.FC = () => {
               type="button"
               onClick={() => { setAuthMode('login'); setError(null); }}
               className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition-all cursor-pointer ${authMode === 'login'
-                  ? 'bg-slate-800 text-amber-400 shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                ? 'bg-slate-800 text-amber-400 shadow-sm'
+                : 'text-slate-400 hover:text-white'
                 }`}
             >
               Sign In
@@ -195,8 +195,8 @@ export const AuthPage: React.FC = () => {
               type="button"
               onClick={() => { setAuthMode('register'); setError(null); }}
               className={`flex-1 py-1.5 text-center text-xs font-bold rounded-lg transition-all cursor-pointer ${authMode === 'register'
-                  ? 'bg-slate-800 text-amber-400 shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                ? 'bg-slate-800 text-amber-400 shadow-sm'
+                : 'text-slate-400 hover:text-white'
                 }`}
             >
               Create Account
@@ -237,7 +237,7 @@ export const AuthPage: React.FC = () => {
                   required
                   placeholder="Enter login number (e.g. 775)"
                   value={userNumber}
-                  onChange={(e) => setUserNumber(e.target.value.replace(/[^0-9]/g, ''))}
+                  onChange={(e) => setUserNumber(e.target.value.replace(/[\s]/g, ''))}
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-850 rounded-xl text-xs font-semibold text-white placeholder-slate-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all font-sans font-mono"
                 />
               </div>
