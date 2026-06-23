@@ -2,6 +2,11 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
+import dns from 'dns';
+
+// Force Node.js to use reliable DNS servers (fixes SRV lookup issues with MongoDB Atlas)
+dns.setDefaultResultOrder('ipv4first');
+dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 
 dotenv.config();
 
@@ -20,7 +25,7 @@ app.use((req, res, next) => {
 });
 
 const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/tml-prediction-game";
-mongoose.connect(mongoUri)
+mongoose.connect(mongoUri, { family: 4 })
   .then(() => console.log("Connected to MongoDB successfully"))
   .catch(err => console.error("MongoDB connection error:", err));
 
