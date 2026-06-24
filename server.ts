@@ -405,7 +405,6 @@ app.get('/api/predictions/user/:userId', async (req, res) => {
   const userId = req.params.userId;
   try {
     const list = await PredictionModel.find({ userId });
-    console.log(list)
     res.json(list);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -470,7 +469,7 @@ app.get('/api/users/:uid', async (req, res) => {
 app.post('/api/users/google-sync', async (req, res) => {
   const { uid, email, displayName } = req.body;
   try {
-    let user = await UserModel.findById(uid);
+    let user = await UserModel.findOne({ email: email.toLowerCase() });
     if (!user) {
       const isUserAdmin = email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
       user = new UserModel({

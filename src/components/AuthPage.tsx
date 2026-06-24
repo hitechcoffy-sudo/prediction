@@ -8,8 +8,8 @@ export const AuthPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Tab/Toggle state: 'login' | 'register'
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('register');
+  // Tab/Toggle state: 'login' | 'register' - Default to 'login'
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   // Input fields
   const [userNumber, setUserNumber] = useState('');
@@ -18,37 +18,57 @@ export const AuthPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!userNumber || !password) {
       setError("Please fill in all required fields.");
       return;
     }
     setError(null);
+
+    // Validate display name for registration
+    if (authMode === 'register' && !displayName.trim()) {
+      setError("Please enter a display name for the leaderboards.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       if (authMode === 'register') {
-        if (!displayName.trim()) {
-          setError("Please enter a display name for the leaderboards.");
-          setIsLoading(false);
-          return;
-        }
         await signUp(userNumber.trim().toLowerCase(), displayName.trim(), password);
+        setError(null);
+        // Reset form after successful registration
+        setUserNumber('');
+        setPassword('');
+        setDisplayName('');
+        // Switch to login mode after successful registration
+        setAuthMode('login');
+        // Show success message
+        setError("✅ Account created successfully! Please sign in.");
       } else {
         await login(userNumber.trim().toLowerCase(), password);
+        setError(null);
+        // Reset form after successful login
+        setUserNumber('');
+        setPassword('');
       }
     } catch (err: any) {
       console.error(err);
-      let msg = err?.message || "Authentication failed. Please check credentials.";
+      alert(err)
+      let msg = "Authentication failed. Please check credentials.";
       const errStr = String(err?.code || err?.message || err || '').toLowerCase();
 
       // Clean up common firebase errors for friendly reading
       if (errStr.includes('invalid-credential') || errStr.includes('user-not-found') || errStr.includes('wrong-password') || errStr.includes('incorrect password') || errStr.includes('not registered')) {
-        msg = err?.message || "Invalid number or password. Please verify and try again.";
+        msg = "❌ Invalid number or password. Please verify and try again.";
       } else if (errStr.includes('weak-password')) {
-        msg = "Password should be at least 6 characters.";
+        msg = "❌ Password should be at least 6 characters.";
       } else if (errStr.includes('already-in-use') || errStr.includes('already_in_use') || errStr.includes('already exist') || errStr.includes('already registered')) {
-        msg = err?.message || "This number is already registered. Try signing in instead.";
+        msg = "❌ This number is already registered. Try signing in instead.";
+      } else {
+        msg = err?.message || "❌ Authentication failed. Please check credentials.";
       }
+
       setError(msg);
     } finally {
       setIsLoading(false);
@@ -102,39 +122,19 @@ export const AuthPage: React.FC = () => {
           </p>
         </div>
 
+        {/* Error Message Display */}
         {error && (
-          <div className="mb-5 p-4 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs leading-relaxed flex flex-col gap-1.5">
+          <div className={`mb-5 p-4 rounded-xl border text-xs leading-relaxed flex items-start gap-2 ${error.includes('✅')
+            ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300'
+            : 'bg-red-950/40 border-red-500/30 text-red-300'
+            }`}>
             <span>{error}</span>
-            {error.includes("already in use") && (
-              <button
-                type="button"
-                onClick={() => {
-                  setAuthMode('login');
-                  setError(null);
-                }}
-                className="mt-1 text-left text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer text-xs"
-              >
-                Switch to Sign In tab &rarr;
-              </button>
-            )}
-            {(error.toLowerCase().includes("not registered") || error.toLowerCase().includes("sign up first")) && (
-              <button
-                type="button"
-                onClick={() => {
-                  setAuthMode('register');
-                  setError(null);
-                }}
-                className="mt-1 text-left text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer text-xs"
-              >
-                Switch to Create Account tab to register #{userNumber} &rarr;
-              </button>
-            )}
           </div>
         )}
 
         <div className="space-y-5" id="firebase-auth-section">
           {/* Google Sign In Federated Provider (Standard Option) */}
-          {/* <div>
+          <div>
             <button
               id="google-signin-btn"
               type="button"
@@ -169,7 +169,7 @@ export const AuthPage: React.FC = () => {
                 </>
               )}
             </button>
-          </div> */}
+          </div>
 
           <div className="flex items-center gap-3 py-1 select-none">
             <span className="h-px bg-slate-800 flex-1" />
@@ -289,4 +289,3 @@ export const AuthPage: React.FC = () => {
     </div>
   );
 };
-
