@@ -6,10 +6,22 @@ import { motion } from 'motion/react';
 
 export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
   const { currentUser, predictions, savePrediction } = useGame();
-  
+
   // Find current user's prediction for this match
-  const myPrediction = predictions.find(p => p.matchId === match.id && p.userId === currentUser?.uid);
-  
+
+  const [myPrediction, setMyPrediction] = useState<Prediction | undefined>();
+
+  useEffect(() => {
+    const prediction = predictions.find(
+      p => p.matchId === match.id &&
+        p.userId === currentUser?.uid
+    );
+
+
+    setMyPrediction(prediction);
+    console.log(predictions)
+  }, [predictions, currentUser?.uid, match.id]);
+
   // Input states for score prediction
   const [homePred, setHomePred] = useState<string>('');
   const [awayPred, setAwayPred] = useState<string>('');
@@ -25,15 +37,15 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
   useEffect(() => {
     const kickoffMs = new Date(match.kickoffTime).getTime();
     const now = Date.now();
-    
+
     if (now >= kickoffMs) {
       setLiveLocked(true);
       return;
     }
-    
+
     setLiveLocked(false);
     const delay = kickoffMs - now;
-    
+
     // Safety check for maximum 32-bit integer timeout delay (approx 24.8 days)
     if (delay < 2147483647) {
       const timer = setTimeout(() => {
@@ -91,10 +103,10 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
   const isKnockout = match.stage !== 'Group Stage';
 
   // Have the predictions changed?
-  const isDirty = myPrediction 
-    ? (homePred !== myPrediction.homePredicted.toString() || 
-       awayPred !== myPrediction.awayPredicted.toString() ||
-       (parseInt(homePred) === parseInt(awayPred) && isKnockout && predShootout !== (myPrediction.shootoutWinner || null)))
+  const isDirty = myPrediction
+    ? (homePred !== myPrediction.homePredicted.toString() ||
+      awayPred !== myPrediction.awayPredicted.toString() ||
+      (parseInt(homePred) === parseInt(awayPred) && isKnockout && predShootout !== (myPrediction.shootoutWinner || null)))
     : (homePred !== '' && awayPred !== '');
 
   const handlePredictSubmit = async (e: React.FormEvent) => {
@@ -159,7 +171,7 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -171,7 +183,7 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           <span className={`px-2.5 py-0.5 rounded-lg border font-semibold text-[10px] tracking-wide ${getStageBadgeStyle(match.stage)}`}>
             {match.stage}
           </span>
-          
+
           <div className="flex items-center gap-2">
             {match.status === MatchStatus.FINISHED ? (
               <span className="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold uppercase text-[9px] px-2 py-0.5 rounded-md tracking-wider">
@@ -222,7 +234,7 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
             )}
             {match.status === MatchStatus.FINISHED && (
               <span className="text-[8px] uppercase font-black text-emerald-400 mt-1.5 font-sans tracking-widest text-center block leading-tight">
-                {isKnockout && match.homeScore === match.awayScore && match.shootoutWinner 
+                {isKnockout && match.homeScore === match.awayScore && match.shootoutWinner
                   ? `PEN: ${match.shootoutWinner === 'home' ? 'HOME' : 'AWAY'}`
                   : 'FINAL'}
               </span>
@@ -242,7 +254,7 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
 
         {/* Prediction Input / Outputs Drawer */}
         <div className="mt-2 pt-4 border-t border-slate-800/30 relative overflow-hidden min-h-[140px]">
-          
+
           {/* SUCCESS OVERLAY */}
           {saveSuccess && (
             <motion.div
@@ -328,7 +340,7 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
             )
           ) : myPrediction && !isEditingPrediction ? (
             /* SECURED PREDICTION MODE (BEFORE KICKOFF) */
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="flex flex-col items-center justify-between p-4.5 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-slate-950/60 to-slate-950/45 border border-emerald-500/25 w-full shadow-lg text-center"
@@ -339,7 +351,7 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
                   <span>Successfully Predicted! ★</span>
                 </div>
                 <p className="text-[11px] text-slate-305 mt-1.5 leading-relaxed font-sans max-w-sm">
-                  You successfully predicted this game! Your prediction is secured and locked. 
+                  You successfully predicted this game! Your prediction is secured and locked.
                 </p>
               </div>
 
@@ -392,11 +404,10 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
                       setHomePred('2');
                       setAwayPred('1');
                     }}
-                    className={`py-2 px-1 rounded-xl text-xs font-bold transition duration-200 border cursor-pointer select-none flex flex-col items-center justify-center gap-1 ${
-                      homePred && awayPred && parseInt(homePred) > parseInt(awayPred)
-                        ? 'bg-amber-500/20 border-amber-500 text-amber-400 font-extrabold'
-                        : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
-                    }`}
+                    className={`py-2 px-1 rounded-xl text-xs font-bold transition duration-200 border cursor-pointer select-none flex flex-col items-center justify-center gap-1 ${homePred && awayPred && parseInt(homePred) > parseInt(awayPred)
+                      ? 'bg-amber-500/20 border-amber-500 text-amber-400 font-extrabold'
+                      : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                      }`}
                   >
                     <span className="text-sm">👑</span>
                     <span className="truncate max-w-full text-[10px]">{match.homeTeam} Win</span>
@@ -408,11 +419,10 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
                       setHomePred('1');
                       setAwayPred('1');
                     }}
-                    className={`py-2 px-1 rounded-xl text-xs font-bold transition duration-200 border cursor-pointer select-none flex flex-col items-center justify-center gap-1 ${
-                      homePred && awayPred && parseInt(homePred) === parseInt(awayPred)
-                        ? 'bg-amber-500/20 border-amber-500 text-amber-400 font-extrabold'
-                        : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
-                    }`}
+                    className={`py-2 px-1 rounded-xl text-xs font-bold transition duration-200 border cursor-pointer select-none flex flex-col items-center justify-center gap-1 ${homePred && awayPred && parseInt(homePred) === parseInt(awayPred)
+                      ? 'bg-amber-500/20 border-amber-500 text-amber-400 font-extrabold'
+                      : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                      }`}
                   >
                     <span className="text-sm shadow-sm">🤝</span>
                     <span className="uppercase text-[10px]">Predict Draw</span>
@@ -424,11 +434,10 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
                       setHomePred('1');
                       setAwayPred('2');
                     }}
-                    className={`py-2 px-1 rounded-xl text-xs font-bold transition duration-200 border cursor-pointer select-none flex flex-col items-center justify-center gap-1 ${
-                      homePred && awayPred && parseInt(homePred) < parseInt(awayPred)
-                        ? 'bg-amber-500/20 border-amber-500 text-amber-400 font-extrabold'
-                        : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
-                    }`}
+                    className={`py-2 px-1 rounded-xl text-xs font-bold transition duration-200 border cursor-pointer select-none flex flex-col items-center justify-center gap-1 ${homePred && awayPred && parseInt(homePred) < parseInt(awayPred)
+                      ? 'bg-amber-500/20 border-amber-500 text-amber-400 font-extrabold'
+                      : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                      }`}
                   >
                     <span className="text-sm">👑</span>
                     <span className="truncate max-w-full text-[10px]">{match.awayTeam} Win</span>
@@ -448,11 +457,10 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
                       <button
                         type="button"
                         onClick={() => setPredShootout('home')}
-                        className={`py-2 px-2 rounded-xl text-xs font-bold border transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                          predShootout === 'home'
-                            ? 'bg-indigo-600/30 border-indigo-500 text-indigo-400 font-extrabold shadow-sm'
-                            : 'bg-slate-950/65 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
-                        }`}
+                        className={`py-2 px-2 rounded-xl text-xs font-bold border transition cursor-pointer flex items-center justify-center gap-1.5 ${predShootout === 'home'
+                          ? 'bg-indigo-600/30 border-indigo-500 text-indigo-400 font-extrabold shadow-sm'
+                          : 'bg-slate-950/65 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
+                          }`}
                       >
                         <span className="shrink-0">{match.homeFlag || '⚽'}</span>
                         <span className="truncate">{match.homeTeam}</span>
@@ -460,11 +468,10 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
                       <button
                         type="button"
                         onClick={() => setPredShootout('away')}
-                        className={`py-2 px-2 rounded-xl text-xs font-bold border transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                          predShootout === 'away'
-                            ? 'bg-indigo-600/30 border-indigo-500 text-indigo-400 font-extrabold shadow-sm'
-                            : 'bg-slate-950/65 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
-                        }`}
+                        className={`py-2 px-2 rounded-xl text-xs font-bold border transition cursor-pointer flex items-center justify-center gap-1.5 ${predShootout === 'away'
+                          ? 'bg-indigo-600/30 border-indigo-500 text-indigo-400 font-extrabold shadow-sm'
+                          : 'bg-slate-950/65 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
+                          }`}
                       >
                         <span className="shrink-0">{match.awayFlag || '⚽'}</span>
                         <span className="truncate">{match.awayTeam}</span>
@@ -481,17 +488,17 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
                       {parseInt(homePred) > parseInt(awayPred)
                         ? `Predicting: ${match.homeTeam} Win`
                         : parseInt(homePred) < parseInt(awayPred)
-                        ? `Predicting: ${match.awayTeam} Win`
-                        : isKnockout 
-                          ? `Predicting: DRAW (SO: ${predShootout ? (predShootout === 'home' ? match.homeTeam : match.awayTeam) : 'None elegido'})`
-                          : "Predicting: DRAW"}
+                          ? `Predicting: ${match.awayTeam} Win`
+                          : isKnockout
+                            ? `Predicting: DRAW (SO: ${predShootout ? (predShootout === 'home' ? match.homeTeam : match.awayTeam) : 'None elegido'})`
+                            : "Predicting: DRAW"}
                     </span>
                   )}
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-slate-950/40 border border-slate-850/60 rounded-2xl">
-                
+
                 {/* Visual Tactile Increments Console */}
                 <div className="flex items-center justify-center gap-3 select-none w-full sm:w-auto">
                   <span className="text-slate-500 text-[10px] font-bold uppercase mr-1 select-none hidden lg:inline">Score:</span>
@@ -566,7 +573,7 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
                       <Check className="w-3.5 h-3.5" /> Saved!
                     </span>
                   )}
-                  
+
                   {myPrediction && (
                     <button
                       type="button"
@@ -585,11 +592,10 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
                     <button
                       type="submit"
                       disabled={isSaving || saveSuccess}
-                      className={`w-full sm:w-auto text-xs px-4 py-2 font-bold rounded-xl transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
-                        saveSuccess 
-                          ? 'bg-emerald-500 text-slate-950' 
-                          : 'bg-amber-500 hover:bg-amber-400 text-slate-950'
-                      }`}
+                      className={`w-full sm:w-auto text-xs px-4 py-2 font-bold rounded-xl transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${saveSuccess
+                        ? 'bg-emerald-500 text-slate-950'
+                        : 'bg-amber-500 hover:bg-amber-400 text-slate-950'
+                        }`}
                     >
                       {isSaving ? (
                         <span className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
@@ -632,7 +638,7 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
           </button>
 
           {showOtherPredictions && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               className="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 overflow-hidden px-0.5 pb-0.5"
@@ -642,17 +648,16 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
                 const isOutcome = match.status === MatchStatus.FINISHED && pred.status === PredictionStatus.WINNER_CORRECT;
 
                 return (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    key={pred.id} 
-                    className={`flex items-center justify-between p-3 rounded-xl text-xs border transition shadow-sm ${
-                      isExact 
-                        ? 'bg-amber-950/20 border-amber-500/25 text-amber-300' 
-                        : isOutcome 
-                          ? 'bg-indigo-950/15 border-indigo-500/20 text-indigo-300' 
-                          : 'bg-slate-950/40 border-slate-850/80 text-slate-450'
-                    }`}
+                    key={pred.id}
+                    className={`flex items-center justify-between p-3 rounded-xl text-xs border transition shadow-sm ${isExact
+                      ? 'bg-amber-950/20 border-amber-500/25 text-amber-300'
+                      : isOutcome
+                        ? 'bg-indigo-950/15 border-indigo-500/20 text-indigo-300'
+                        : 'bg-slate-950/40 border-slate-850/80 text-slate-450'
+                      }`}
                   >
                     <div className="flex items-center gap-2 truncate pr-1">
                       <div className="w-5.5 h-5.5 rounded-full bg-slate-800 flex items-center justify-center font-bold text-[9px] text-slate-300 uppercase shrink-0">
@@ -674,9 +679,8 @@ export const MatchCard: React.FC<{ match: Match }> = ({ match }) => {
                         )}
                       </div>
                       {match.status === MatchStatus.FINISHED && (
-                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-md ${
-                          isExact ? 'bg-amber-500/20 text-amber-400 border border-amber-500/20' : isOutcome ? 'bg-indigo-500/15 text-indigo-400' : 'bg-slate-900 text-slate-500'
-                        }`}>
+                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-md ${isExact ? 'bg-amber-500/20 text-amber-400 border border-amber-500/20' : isOutcome ? 'bg-indigo-500/15 text-indigo-400' : 'bg-slate-900 text-slate-500'
+                          }`}>
                           {isExact ? '+3P' : isOutcome ? '+1P' : '0P'}
                         </span>
                       )}

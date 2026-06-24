@@ -135,10 +135,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Main API data fetching function for polling/refreshes
   const fetchCloudData = async () => {
+    console.log('dfdfd', currentUser)
     if (!isFirebase) return;
     try {
       const uid = auth?.currentUser?.uid || currentUser?.uid;
-
       // 1. Fetch matches
       const matchesRes = await fetch('/api/matches');
       if (matchesRes.ok) {
@@ -172,6 +172,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const isAdmin = currentUser?.isAdmin || (currentUser?.email === ADMIN_EMAIL);
         const predsUrl = isAdmin ? '/api/predictions' : `/api/predictions/user/${uid}`;
         const predsRes = await fetch(predsUrl);
+        console.log('predRes', predsRes)
         if (predsRes.ok) {
           setPredictions(await predsRes.json());
         }
@@ -333,7 +334,31 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       fetchCloudData();
     }
   }, [activeStage]);
+  // Load predictions whenever currentUser becomes available
+  useEffect(() => {
+    if (!currentUser?.uid || !isFirebase) return;
 
+    const loadPredictions = async () => {
+      try {
+        const predsRes = await fetch(
+          `/api/predictions/user/${currentUser.uid}`
+        );
+
+        if (predsRes.ok) {
+          const data = await predsRes.json();
+          setPredictions(data);
+
+          console.log(
+            `Loaded ${data.length} predictions for user ${currentUser.uid}`
+          );
+        }
+      } catch (err) {
+        console.error('Failed loading predictions:', err);
+      }
+    };
+
+    loadPredictions();
+  }, [currentUser?.uid, isFirebase]);
   // Login handler
   const login = async (numberInput: string, pass: string) => {
     setIsLoading(true);
@@ -533,7 +558,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Save prediction
   const savePrediction = async (matchId: string, homePredicted: number, awayPredicted: number, shootoutWinner?: 'home' | 'away' | null) => {
     if (!currentUser) throw new Error("You must be logged in to make predictions!");
-    console.log("asas", matchId)
     const match = matches.find(m => m.id === matchId);
     if (!match) throw new Error("Match not found!");
 
@@ -842,7 +866,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newMatch)
         });
-        console.log(res)
         if (!res.ok) {
           const errData = await res.json();
           throw new Error(errData.error || "Failed to add match");
