@@ -235,8 +235,6 @@ export const AuthPage: React.FC = () => {
                   id="auth-phone-input"
                   type="tel"
                   inputMode="numeric"
-                  pattern="[0-9]{10}"
-                  maxLength={10}
                   required
                   placeholder="Enter phone number"
                   value={userNumber}
