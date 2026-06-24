@@ -135,7 +135,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Main API data fetching function for polling/refreshes
   const fetchCloudData = async () => {
-    console.log('dfdfd', currentUser)
     if (!isFirebase) return;
     try {
       const uid = auth?.currentUser?.uid || currentUser?.uid;
@@ -172,7 +171,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const isAdmin = currentUser?.isAdmin || (currentUser?.email === ADMIN_EMAIL);
         const predsUrl = isAdmin ? '/api/predictions' : `/api/predictions/user/${uid}`;
         const predsRes = await fetch(predsUrl);
-        console.log('predRes', predsRes)
         if (predsRes.ok) {
           setPredictions(await predsRes.json());
         }
@@ -223,7 +221,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       fetchCloudData();
 
       // Start Polling every 5 seconds for simulated realtime updates
-      const pollInterval = setInterval(fetchCloudData, 5000);
+      const pollInterval = setInterval(fetchCloudData, 1000000);
 
       // Google Auth listener
       if (auth) {
@@ -348,9 +346,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const data = await predsRes.json();
           setPredictions(data);
 
-          console.log(
-            `Loaded ${data.length} predictions for user ${currentUser.uid}`
-          );
         }
       } catch (err) {
         console.error('Failed loading predictions:', err);
