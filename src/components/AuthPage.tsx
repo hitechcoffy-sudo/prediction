@@ -227,18 +227,21 @@ export const AuthPage: React.FC = () => {
 
             <div id="number-field-group">
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                Your Custom Number or email
+                Your Custom Number or id
               </label>
               <div className="relative">
                 <div id="hash-prefix" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs select-none">#</div>
                 <input
-                  id="auth-number-input"
-                  type="text"
+                  id="auth-phone-input"
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
                   required
-                  placeholder="Enter login number (e.g. 775)"
+                  placeholder="Enter phone number"
                   value={userNumber}
-                  onChange={(e) => setUserNumber(e.target.value.replace(/[\s]/g, ''))}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-850 rounded-xl text-xs font-semibold text-white placeholder-slate-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all font-sans font-mono"
+                  onChange={(e) => setUserNumber(e.target.value.replace(/\D/g, ''))}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-850 rounded-xl text-xs font-semibold text-white placeholder-slate-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all font-sans"
                 />
               </div>
             </div>
